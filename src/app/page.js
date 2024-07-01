@@ -8,7 +8,9 @@ import styles from "./page.module.css";
 export default function Home() {
   const [state, setState] = useState('IDLE')
   const [cookies, setCookies] = useState([])
+  const [serverCookies, setServerCookies] = useState([])
 
+  const getAllCookies = () => browserCookies.all()
   const createCookie = (type) => {
     setState('PENDING...')
     fetch(
@@ -19,17 +21,19 @@ export default function Home() {
       }
     )
       .then(async res => {
-        setCookies(() => {
-          return browserCookies.all()
-        })
+        setCookies(getAllCookies)
         setState(`Cookie (${type}) created!`)
       })
   }
+  const fetchCookie = () => {
+    fetch('/cookies').then(async res => {
+      const {items} = await res.json()
+      setServerCookies(items)
+    })
+  }
 
   useEffect(() => {
-    setCookies(() => {
-      return browserCookies.all()
-    })
+    setCookies(getAllCookies)
   }, [])
 
   return (
@@ -43,9 +47,13 @@ export default function Home() {
         <p>
           {state}
         </p>
-        <h2>Cookies</h2>
+        <h2>Browser Cookies</h2>
         <pre>
           {JSON.stringify(cookies, null, 2)}
+        </pre>
+        <button onClick={() => fetchCookie()}>Fetch Server Cookie</button>
+        <pre>
+          {JSON.stringify(serverCookies, null, 2)}
         </pre>
       </div>
     </main>
